@@ -51,14 +51,89 @@ test.describe('Problem User Test Login page', async ()=>{
 
 test.describe("Problem User Inventory Page", async ()=>{
 
-     // o que testar no problem User: 
-    /*
-        1 - Ordem de itens na page invetory não funciona
-        2 - add to cart não funciona em todos os elemento
-        3 - apos add to cart, não consegue remover
-        4 - clicar em about resulta em pagina 404
-        5 - Ao clicar em item no invetario verificar que item no display é diferente ou não existe
-    */
+    test.beforeEach('', async ({page})=>{ 
+      await page.goto(process.env.TEST_LINK || "")
+      await MakeLogin(page, process.env.USER_PROBLEM || '', process.env.SECRET || '')
+
+      expect(page).toHaveURL("https://www.saucedemo.com/inventory.html")
+     })
+
+
+     test("test the order not changing from itens", async({page})=>{
+        const selectOrder =  page.locator('.product_sort_container')
+        
+
+        await selectOrder.selectOption('lohi')
+        const itensInventoryPrice = page.locator('.inventory_item_price')
+        const pricess = await itensInventoryPrice.allTextContents()
+        const pricessNumber = pricess.map(price=>parseFloat(price.replace('$', '')))
+        const sortedPricess = [...pricessNumber].sort((a,b)=>a-b)
+
+
+        expect(sortedPricess).not.toEqual(pricessNumber)
+
+        
+     })
+
+     test("add to cart not working in each element", async({page})=>{
+    
+        const addLabsBackpack = page.locator("#add-to-cart-sauce-labs-backpack")
+        const addLabsBoltTShirt = page.locator("#add-to-cart-sauce-labs-bolt-t-shirt")
+        
+        await addLabsBackpack.click()
+
+        const CartNumber = page.locator(".shopping_cart_badge")
+
+        await expect(CartNumber).toHaveText("1")
+
+        await addLabsBoltTShirt.click()
+
+        await expect(CartNumber).toHaveText("1")
+
+     })
+
+     test("after adding item to cart, you can't remove it", async({page})=>{
+        
+        const addLabsBackpack = page.locator("#add-to-cart-sauce-labs-backpack")
+     
+        await addLabsBackpack.click()
+
+        const CartNumber = page.locator(".shopping_cart_badge")
+
+        await expect(CartNumber).toHaveText("1")
+        
+        const removeLabsBackpack = page.locator("#remove-sauce-labs-backpack")
+
+        await removeLabsBackpack.click()
+
+        await expect(CartNumber).toHaveText("1")
+
+     })
+
+     test("click in 'about' page result in 404 error", async({page})=>{
+        
+        const sideBar = page.locator("#react-burger-menu-btn")
+        await sideBar.click()
+
+        const aboutSideBar = page.locator("#about_sidebar_link")
+        await aboutSideBar.click()
+
+        await expect(page).toHaveURL("https://saucelabs.com/error/404")
+
+     })
+
+     test("different item in inventory after click in it", async({page})=>{
+        //Sauce Labs Fleece Jacket e 
+        const firstItem = page.locator(".inventory_item_name ").first()
+        await firstItem.click()
+
+        await expect(page).toHaveURL("https://www.saucedemo.com/inventory-item.html?id=5")
+
+        const itemName = page.locator(".inventory_details_name")
+
+        await expect(itemName).toHaveText("Sauce Labs Fleece Jacket")
+     })
+
 
 })
 
