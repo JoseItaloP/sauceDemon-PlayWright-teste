@@ -61,3 +61,13 @@ test.describe("Problem User Inventory Page", async ()=>{
     */
 
 })
+
+test.describe("Problem User Cart Page", async ()=>{
+  /*
+    O que testar 
+     1 - Check-out step one page
+        First name com apenas 1 character
+        Last Name não digitavel
+        Não conseguir continuar sem o last name
+  */
+})
